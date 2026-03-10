@@ -459,9 +459,13 @@ def download_file(
 
             # Parse HTML content to extract the actual download link
             soup = Soup(html)
-            base64_data = soup.find("a", {"id": "downloadButton"}).attrs["data-scrambled-url"]
-            decode_base_64_link = base64.b64decode(base64_data).decode("utf-8")
-            parsed_url = urllib.parse.urlparse(decode_base_64_link)
+            try:
+                base64_data = soup.find("a", {"id": "downloadButton"}).attrs["data-scrambled-url"]
+                decode_link = base64.b64decode(base64_data).decode("utf-8")
+            except KeyError:
+                decode_link = soup.find("a", {"id": "downloadButton"}).attrs["href"]
+            
+            parsed_url = urllib.parse.urlparse(decode_link)
             conn = http.client.HTTPConnection(parsed_url.netloc)
             conn.request(
                 "GET",
